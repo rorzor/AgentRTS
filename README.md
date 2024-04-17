@@ -30,4 +30,22 @@ The objective is general RTS style- collect enough resources to produce enough r
 
 Current main objective is to collect and be in possession of enough of the rarest of resources, which is always heavily guarded by hostile NPCs in order to research the final technology tier.
 
+## Resources 
+
+There are three types of resource to collect:
+
+* Organic:
+ * These are abundant throughout the map and continue to slowly 'grow' based on Game of Life mechanics.
+ * They are required primarily to create replicants. (maybe they will also be consumed slowly by replicants taking actions)
+
+* Inorganic (minerals):
+ * These are less abundant, and do no replenish over time.
+ * These are required for permanent upgrades to replicants systems
+
+* Alien Artifacts:
+ * These are extremely rare and always guarded by hostile NPCs.
+ * Unlike the other resources types, these need to be picked up by replicants and carried back to the ship to be gathered
+ * Control over a critical number of these artifacts unlocks high level upgrades to be researched, the final of which wins the game
+
+
 
