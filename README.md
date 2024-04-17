@@ -22,7 +22,7 @@ At any time a replicant [AI agent] can be left to its devices, and will attempt 
 The player can spawn a new replicant when it has enough resources. The new replicant can either act with an existing policy, or the player can 'play' as the replicant, essentially training a new policy.
 
 There would be a small number of 'upgrades' that can be researched with sufficient resources, most of which directly affect the performance of the replicant AI. these could be:
-* increased observation space (eg 5x5 to 6x6 grid)
+* increased observation space (eg 7x7 to 8x8 grid)
 * Increased maximum number of observations possible to train a policy
  
 
@@ -47,5 +47,14 @@ There are three types of resource to collect:
  * Unlike the other resources types, these need to be picked up by replicants and carried back to the ship to be gathered
  * Control over a critical number of these artifacts unlocks high level upgrades to be researched, the final of which wins the game
 
+## Coding Scheme
+Integer encoding will be used to represent different possible contents of each cell in the grid around the player/agent:
 
+* 0 - Empty
+* 11 - Organic
+* 12 - Mineral
+* 13 - Artifact
+* 14 - Friendly NPC (other agents)
+* 15 - Hostile NPC
+* 1-10 - Represents the current hit points of the player/agent. This set of values will only ever exist in the center square e.g. (4,4)
 
