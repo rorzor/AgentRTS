@@ -22,8 +22,8 @@ At any time a replicant [AI agent] can be left to its devices, and will attempt 
 The player can spawn a new replicant when it has enough resources. The new replicant can either act with an existing policy, or the player can 'play' as the replicant, essentially training a new policy.
 
 There would be a small number of 'upgrades' that can be researched with sufficient resources, most of which directly affect the performance of the replicant AI. these could be:
-*increased observation space (eg 5x5 to 6x6 grid)
-*Increased maximum number of observations possible to train a policy
+* increased observation space (eg 5x5 to 6x6 grid)
+* Increased maximum number of observations possible to train a policy
  
 
 The objective is general RTS style- collect enough resources to produce enough replicates to battle and defeat the other human players.
