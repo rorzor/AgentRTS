@@ -24,6 +24,7 @@ The player can spawn a new replicant when it has enough resources. The new repli
 There would be a small number of 'upgrades' that can be researched with sufficient resources, most of which directly affect the performance of the replicant AI. these could be:
 * increased observation space (eg 7x7 to 8x8 grid)
 * Increased maximum number of observations possible to train a policy
+* Ability to mass-update all agents with an available policy
  
 
 The objective is general RTS style- collect enough resources to produce enough replicates to battle and defeat the other human players.
