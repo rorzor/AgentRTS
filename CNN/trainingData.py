@@ -2,6 +2,7 @@ import numpy as np
 import pygame
 import pandas as pd
 from keras.saving import load_model
+from random import randrange
 
 
 class Board:
@@ -76,12 +77,15 @@ def predict_action(boardstate):
     prediction = model.predict(instance)[0]
     print(f'Prediction confidence: {prediction}')
     
-    # Get the class index with the highest probability
-    #predicted_class_index = np.argmax(prediction)
+    random_fact = randrange(8)
 
-    # Sample from the probability distribution
-    predicted_class_index = np.random.choice(len(prediction), p=prediction)
-    
+    if random_fact == 1:
+        # Sample from the probability distribution
+        predicted_class_index = np.random.choice(len(prediction), p=prediction)
+    else:
+        # Get the class index with the highest probability
+        predicted_class_index = np.argmax(prediction)
+
     # Optionally, convert the index to a label
     predicted_label = list(label_dict.keys())[predicted_class_index]
     
@@ -97,6 +101,7 @@ board = Board()
 data = []  # List to store all data entries
 selection = None
 frames_collected = 0
+AIactions_taken = 0
 
 # Optionally load in a keras model to compare result
 print('Load existing model: test_model.keras? y/n')
@@ -135,12 +140,15 @@ while running:
         
                 elif event.key in [pygame.K_m]:
                     # make a prediction based on the pretrained model and take action
+                    AIactions_taken += 1
                     selection = predict_action(board.board.flatten())
                     board.update_board(selection)
+                    print(f'AI Score/Actions Ratio x10: {10*board.score/AIactions_taken}')
                     waiting_for_input = False
                 
                 elif event.key in [pygame.K_q]:
                     save_data(data)
                     pygame.quit()
+                
     
 pygame.quit()
