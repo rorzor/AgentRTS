@@ -37,7 +37,7 @@ There are three types of resource to collect:
 
 * Organic:
  * These are abundant throughout the map and continue to slowly 'grow' based on Game of Life mechanics.
- * They are required primarily to create replicants. (maybe they will also be consumed slowly by replicants taking actions)
+ * They are required primarily to create replicants. (maybe they will also be consumed slowly by replicants taking actions, to ensure only 'healthy' replicants can survive)
 
 * Inorganic (minerals):
  * These are less abundant, and do no replenish over time.
@@ -58,4 +58,24 @@ Integer encoding will be used to represent different possible contents of each c
 * 14 - Friendly NPC (other agents)
 * 15 - Hostile NPC
 * 1-10 - Represents the current hit points of the player/agent. This set of values will only ever exist in the center square e.g. (4,4)
+
+# UI
+UI will be built in pygame initially, as a 'zelda' like top down RPG style built over an NxM grid.
+
+Data samples that train the AI models will be taken when the player moves into (or perhaps out of) a 'tile' of hte grid, to prevent over sampling.
+
+The UI will show current metrics for the player and the agent they are in control of:
+* Agent health
+* Resources:
+  * Organic (also as per/minute)
+  * Mineral (also as per/minute)
+  * Artifacts under control
+* Active Agents
+* Policy Metrics
+* Recording/Not-recording
+
+# Policies
+Initially, there will only be a sinlge policy available, which can be updated by 'recording' data frames. The player can toggle on/off whether they want to record data frames at any time.
+
+The player may update the policy based on new data frames at any time, which will create a new model for the existing agents to follow. 
 
