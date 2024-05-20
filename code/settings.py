@@ -4,6 +4,11 @@ HEIGTH   = 720
 FPS      = 60
 TILESIZE = 64
 
+MAPHEIGHT = 100
+MAPWIDTH = 100
+
+ORGANICPROB = 0.05
+
 WORLD_MAP = [
 ['x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x'],
 ['x',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
