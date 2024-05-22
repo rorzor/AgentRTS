@@ -5,6 +5,7 @@ from agent import Agent
 from debug import debug
 from support import *
 from random import choice
+from weapon import Weapon
 
 class Level:
 	def __init__(self):
@@ -21,7 +22,12 @@ class Level:
 
 	def create_map(self):
 		# spawn the player agent
-		self.player = Agent((100,100),[self.visible_sprites],self.obstacle_sprites)
+		self.player = Agent((300,300),[self.visible_sprites],self.obstacle_sprites, self.create_attack)
+		Agent((500,300),[self.visible_sprites],self.obstacle_sprites, self.create_attack)
+
+		# spawn the landed ship
+		ship_surf = pygame.image.load('../graphics/ship/ship_1.png').convert_alpha()
+		Tile((64,64),[self.visible_sprites,self.obstacle_sprites],'ship',ship_surf)		
 		
 		# create the layouts
 		layouts = {
@@ -29,7 +35,8 @@ class Level:
 			'resources': create_resources()
 		}
 		graphics = {
-			'organics': import_folder('../graphics/organics')
+			'organics': import_folder('../graphics/organics'),
+			'minerals': import_folder('../graphics/minerals')
 		}
 
 		for style,layout in layouts.items():
@@ -41,10 +48,18 @@ class Level:
 						if style == 'boundary':
 							Tile((x,y),[self.obstacle_sprites],'invisible')
 						if style == 'resources':
-							# TODO expand out to include mineral resources
-							random_plant_image = choice(graphics['organics'])
-							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'organics',random_plant_image)
-						
+							# spawn organics
+							if col == 51:
+								random_plant_image = choice(graphics['organics'])
+								Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'organics',random_plant_image)
+							# spawn minerals
+							if col == 52:
+								random_mineral_image = choice(graphics['minerals'])
+								Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'minerals',random_mineral_image)
+
+	def create_attack(self,agent):
+		Weapon(agent,[self.visible_sprites])
+
 	def run(self):
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player)
