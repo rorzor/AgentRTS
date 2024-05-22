@@ -15,5 +15,5 @@ MINSPACING = 8
 
 # weapons
 weapon_data = {
-    'scythe': {'cooldown': 100, 'damage': 15, 'graphic': '../graphics/weapons/sabre'}
+    'sabre': {'cooldown': 100, 'damage': 15, 'graphic': '../graphics/weapons/sabre'}
 }

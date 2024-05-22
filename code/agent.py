@@ -23,9 +23,12 @@ class Agent(pygame.sprite.Sprite):
 		self.attacking = False
 		self.attack_cooldown = 300
 		self.attack_time = 0
-		self.create_attack = create_attack
-
 		self.obstacle_sprites = obstacle_sprites
+
+		# weapons
+		self.create_attack = create_attack
+		self.weapon_index = 0
+		self.weapon = list(weapon_data.keys())[self.weapon_index]
 
 	def import_agent_assets(self):
 		path = '../graphics/agent/'
