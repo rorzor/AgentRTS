@@ -21,7 +21,7 @@ class Agent(pygame.sprite.Sprite):
 
 		# movement
 		self.direction = pygame.math.Vector2()
-		self.speed = 5
+		self.speed = 4
 		self.attacking = False
 		self.attack_cooldown = 300
 		self.attack_time = 0

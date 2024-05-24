@@ -35,7 +35,9 @@ class Level:
 	def create_map(self):
 		# spawn the player agent
 		self.player_agent = Agent(self.player,(300,300),[self.visible_sprites,self.obstacle_sprites],self.obstacle_sprites, self.create_attack)
-		Agent(self.player,(500,300),[self.visible_sprites],self.obstacle_sprites, self.create_attack)
+		Agent(self.player,(500,300),[self.visible_sprites,self.obstacle_sprites],self.obstacle_sprites, self.create_attack)
+		#Agent(self.player,(700,300),[self.visible_sprites,self.obstacle_sprites],self.obstacle_sprites, self.create_attack)
+
 
 		# spawn the landed ship
 		ship_surf = pygame.image.load('../graphics/ship/ship_1.png').convert_alpha()
