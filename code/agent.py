@@ -5,11 +5,13 @@ from debug import debug
 from weapon import Weapon
 
 class Agent(pygame.sprite.Sprite):
-	def __init__(self,pos,groups,obstacle_sprites,create_attack):
+	def __init__(self,player,pos,groups,obstacle_sprites,create_attack):
 		super().__init__(groups)
 		self.image = pygame.image.load('../graphics/test/player.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
 		self.hitbox = self.rect.inflate(0,-26)
+		self.obstacle_sprites = obstacle_sprites
+		self.sprite_type = 'agent'
 
 		# graphics setup
 		self.import_agent_assets()
@@ -23,7 +25,6 @@ class Agent(pygame.sprite.Sprite):
 		self.attacking = False
 		self.attack_cooldown = 300
 		self.attack_time = 0
-		self.obstacle_sprites = obstacle_sprites
 
 		# weapons
 		self.create_attack = create_attack
@@ -94,8 +95,7 @@ class Agent(pygame.sprite.Sprite):
 	def attack_check(self,sprite):
 		if self.attacking:
 			return
-		if sprite.sprite_type == 'organics' or sprite.sprite_type == 'minerals':
-			print(f'Attacking ' + sprite.sprite_type)
+		if sprite.sprite_type == 'organic' or sprite.sprite_type == 'mineral':
 			self.attack_time = pygame.time.get_ticks()
 			self.attacking = True
 			self.create_attack(self)
@@ -103,6 +103,8 @@ class Agent(pygame.sprite.Sprite):
 	def collision(self,direction):
 		if direction == 'horizontal':
 			for sprite in self.obstacle_sprites:
+				if sprite is self:
+					continue
 				if sprite.hitbox.colliderect(self.hitbox):
 					self.attack_check(sprite)
 					if self.direction.x > 0: # moving right
@@ -112,6 +114,8 @@ class Agent(pygame.sprite.Sprite):
 
 		if direction == 'vertical':
 			for sprite in self.obstacle_sprites:
+				if sprite is self:
+					continue
 				if sprite.hitbox.colliderect(self.hitbox):
 					self.attack_check(sprite)
 					if self.direction.y > 0: # moving down
@@ -133,7 +137,6 @@ class Agent(pygame.sprite.Sprite):
 		
 		self.image = animation[int(self.frame_index)]
 		self.rect = self.image.get_rect(center = self.hitbox.center)
-
 
 	def update(self):
 		self.input()

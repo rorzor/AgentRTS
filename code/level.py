@@ -1,11 +1,14 @@
-import pygame 
+import pygame
+from random import choice
 from settings import *
 from tile import Tile
 from agent import Agent
 from debug import debug
 from support import *
-from random import choice
 from weapon import Weapon
+from player import Player
+from ui import UI
+from resources import Resource
 
 class Level:
 	def __init__(self):
@@ -17,13 +20,22 @@ class Level:
 		self.visible_sprites = YSortCameraGroup()
 		self.obstacle_sprites = pygame.sprite.Group()
 
+		self.attack_sprites = pygame.sprite.Group()
+		self.harvestable_sprites = pygame.sprite.Group()
+
+		# create player
+		self.player = Player()
+
 		# sprite setup
 		self.create_map()
 
+		# user interface
+		self.ui = UI()
+
 	def create_map(self):
 		# spawn the player agent
-		self.player = Agent((300,300),[self.visible_sprites],self.obstacle_sprites, self.create_attack)
-		Agent((500,300),[self.visible_sprites],self.obstacle_sprites, self.create_attack)
+		self.player_agent = Agent(self.player,(300,300),[self.visible_sprites,self.obstacle_sprites],self.obstacle_sprites, self.create_attack)
+		Agent(self.player,(500,300),[self.visible_sprites],self.obstacle_sprites, self.create_attack)
 
 		# spawn the landed ship
 		ship_surf = pygame.image.load('../graphics/ship/ship_1.png').convert_alpha()
@@ -51,20 +63,44 @@ class Level:
 							# spawn organics
 							if col == 51:
 								random_plant_image = choice(graphics['organics'])
-								Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'organics',random_plant_image)
+								Resource((x,y),
+			 						[self.visible_sprites,self.obstacle_sprites,self.harvestable_sprites],
+									'organic',
+									random_plant_image)
 							# spawn minerals
 							if col == 52:
 								random_mineral_image = choice(graphics['minerals'])
-								Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'minerals',random_mineral_image)
+								Resource((x,y),
+			 						[self.visible_sprites,self.obstacle_sprites,self.harvestable_sprites],
+									'mineral',
+									random_mineral_image)
 
 	def create_attack(self,agent):
-		Weapon(agent,[self.visible_sprites])
+		Weapon(agent,[self.visible_sprites,self.attack_sprites])
+
+	def agent_attack_logic(self):
+		if self.attack_sprites:
+			for attack_sprite in self.attack_sprites:
+				# check for valid harvest
+				if not attack_sprite.harvesting:
+					collision_sprites = pygame.sprite.spritecollide(attack_sprite,self.harvestable_sprites,False)
+					for target_sprite in collision_sprites:
+						for resource_type in resource_harvest.keys():
+							if target_sprite.sprite_type == resource_type and not attack_sprite.harvesting:
+								target_sprite.capacity -= 1
+								self.player.resources[resource_type] += resource_harvest[resource_type]
+								attack_sprite.harvesting = True
+								print(target_sprite.capacity)
+								if target_sprite.capacity == 0:
+									target_sprite.kill()
+								break
 
 	def run(self):
 		# update and draw the game
-		self.visible_sprites.custom_draw(self.player)
+		self.visible_sprites.custom_draw(self.player_agent)
 		self.visible_sprites.update()
-
+		self.agent_attack_logic()
+		self.ui.display(self.player)
 
 class YSortCameraGroup(pygame.sprite.Group):
 	def __init__(self):
@@ -80,11 +116,11 @@ class YSortCameraGroup(pygame.sprite.Group):
 		self.floor_surface = pygame.image.load('../graphics/level/floormap1.png').convert()
 		self.floow_rect	= self.floor_surface.get_rect(topleft = (0,0))
 
-	def custom_draw(self,player):
+	def custom_draw(self,player_agent):
 
 		# getting the offset 
-		self.offset.x = player.rect.centerx - self.half_width
-		self.offset.y = player.rect.centery - self.half_height
+		self.offset.x = player_agent.rect.centerx - self.half_width
+		self.offset.y = player_agent.rect.centery - self.half_height
 
 		# draw the floor
 		floor_offset_pos = self.floow_rect.topleft - self.offset

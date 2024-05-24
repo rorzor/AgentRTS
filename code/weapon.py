@@ -12,6 +12,7 @@ class Weapon(pygame.sprite.Sprite):
         # timer
         self.deploy_time = pygame.time.get_ticks()
         self.deploy_cooldown = 200
+        self.harvesting = False
 
         # placement
         if direction == 'right':
