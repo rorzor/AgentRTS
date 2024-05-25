@@ -7,11 +7,13 @@ from weapon import Weapon
 class Agent(pygame.sprite.Sprite):
 	def __init__(self,player,pos,groups,obstacle_sprites,create_attack):
 		super().__init__(groups)
-		self.image = pygame.image.load('../graphics/test/player.png').convert_alpha()
+		self.image = pygame.image.load('../graphics/agent/down/idle_down.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
 		self.hitbox = self.rect.inflate(0,-26)
 		self.obstacle_sprites = obstacle_sprites
 		self.sprite_type = 'agent'
+		self.player = player
+		self.player.resources['agents'] += 1
 
 		# graphics setup
 		self.import_agent_assets()

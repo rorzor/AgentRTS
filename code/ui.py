@@ -20,6 +20,11 @@ class UI:
         text_rect = text_surf.get_rect(topleft = (10,30))
         self.display_surface.blit(text_surf,text_rect)
 
+        # show minerals
+        text_surf = self.font.render('Agents: ' + str(int(player.resources['agents'])),False,TEXT_COLOR)
+        text_rect = text_surf.get_rect(topleft = (10,50))
+        self.display_surface.blit(text_surf,text_rect)
+
     def display(self,player):
         self.show_resources(player)
         pass

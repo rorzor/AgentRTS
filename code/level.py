@@ -23,8 +23,9 @@ class Level:
 		self.attack_sprites = pygame.sprite.Group()
 		self.harvestable_sprites = pygame.sprite.Group()
 
+		self.player_agent = None
 		# create player
-		self.player = Player()
+		self.player = Player(self.player_agent,self.obstacle_sprites,self.spawn_agent)
 
 		# sprite setup
 		self.create_map()
@@ -34,10 +35,7 @@ class Level:
 
 	def create_map(self):
 		# spawn the player agent
-		self.player_agent = Agent(self.player,(300,300),[self.visible_sprites,self.obstacle_sprites],self.obstacle_sprites, self.create_attack)
-		Agent(self.player,(500,300),[self.visible_sprites,self.obstacle_sprites],self.obstacle_sprites, self.create_attack)
-		#Agent(self.player,(700,300),[self.visible_sprites,self.obstacle_sprites],self.obstacle_sprites, self.create_attack)
-
+		self.spawn_agent(True)
 
 		# spawn the landed ship
 		ship_surf = pygame.image.load('../graphics/ship/ship_1.png').convert_alpha()
@@ -77,6 +75,24 @@ class Level:
 									'mineral',
 									random_mineral_image)
 
+	def spawn_agent(self,players_agent = False):
+		# check if spawn location is free
+		for sprite in self.obstacle_sprites:
+			# if sprite.sprite_type == 'ship':
+			# 	continue
+			if 200 <= sprite.rect.center[0] <= 400 and 200 <= sprite.rect.center[1] <= 400:
+				return debug('Spawn Point Occupied')
+
+		# spawn agent.
+		if players_agent:
+			if self.player_agent is not None:
+				self.player_agent.kill()
+				if self.player.resources['agents'] > 0:
+					self.player.resources['agents'] -= 1
+			self.player_agent = Agent(self.player,(300,300),[self.visible_sprites,self.obstacle_sprites],self.obstacle_sprites, self.create_attack)
+		else:
+			Agent(self.player,(300,300),[self.visible_sprites,self.obstacle_sprites],self.obstacle_sprites, self.create_attack)
+
 	def create_attack(self,agent):
 		Weapon(agent,[self.visible_sprites,self.attack_sprites])
 
@@ -92,7 +108,6 @@ class Level:
 								target_sprite.capacity -= 1
 								self.player.resources[resource_type] += resource_harvest[resource_type]
 								attack_sprite.harvesting = True
-								print(target_sprite.capacity)
 								if target_sprite.capacity == 0:
 									target_sprite.kill()
 								break
@@ -101,6 +116,7 @@ class Level:
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player_agent)
 		self.visible_sprites.update()
+		self.player.update()
 		self.agent_attack_logic()
 		self.ui.display(self.player)
 
