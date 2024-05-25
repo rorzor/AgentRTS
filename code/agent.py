@@ -21,9 +21,13 @@ class Agent(pygame.sprite.Sprite):
 		self.frame_index = 0
 		self.animation_speed = 0.15
 
+		# stats
+		self.stats = {'health': 10, 'energy': 10, 'speed': 4}
+		self.health = self.stats['health']
+		self.energy = self.stats['energy']
+
 		# movement
 		self.direction = pygame.math.Vector2()
-		self.speed = 4
 		self.attacking = False
 		self.attack_cooldown = 300
 		self.attack_time = 0
@@ -145,4 +149,4 @@ class Agent(pygame.sprite.Sprite):
 		self.cooldowns()
 		self.get_status()
 		self.animate()
-		self.move(self.speed)
+		self.move(self.stats['speed'])

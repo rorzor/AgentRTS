@@ -118,7 +118,7 @@ class Level:
 		self.visible_sprites.update()
 		self.player.update()
 		self.agent_attack_logic()
-		self.ui.display(self.player)
+		self.ui.display(self.player,self.player_agent)
 
 class YSortCameraGroup(pygame.sprite.Group):
 	def __init__(self):
