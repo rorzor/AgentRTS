@@ -44,6 +44,10 @@ class Agent(pygame.sprite.Sprite):
 
 		# data frame saver
 		self.save_data_frame = save_data_frame
+		self.can_save_frame = True
+
+		# AI model
+		self.model = None
 
 		# weapons
 		self.create_attack = create_attack
@@ -67,44 +71,47 @@ class Agent(pygame.sprite.Sprite):
 				if keys[pygame.K_UP]:
 					self.direction.y = -1
 					self.status = 'up'
-					#self.save_data_frame()
+					self.save_data()
 				elif keys[pygame.K_DOWN]:
 					self.direction.y = 1
 					self.status = 'down'
-					#self.save_data_frame()
+					self.save_data()
 				else:
 					self.direction.y = 0
 
 				if keys[pygame.K_RIGHT]:
 					self.direction.x = 1
 					self.status = 'right'
-					#self.save_data_frame()
+					self.save_data()
+
 				elif keys[pygame.K_LEFT]:
 					self.direction.x = -1
 					self.status = 'left'
-					#self.save_data_frame()
+					self.save_data()
+
 				else:
 					self.direction.x = 0
 
 				if keys[pygame.K_SPACE]:
 					self.save_data_frame()
-		
 		else:
-			if pygame.time.get_ticks() - self.rand_walk_start > self.rand_walk_time:
-				dir = randint(1,4)
-				if dir == 1:
-					self.direction.y = -1
-					self.status = 'up'
-				elif dir == 2:
-					self.direction.y = 1
-					self.status = 'down'
-				elif dir == 3:
-					self.direction.x = 1
-					self.status = 'right'
-				else:
-					self.direction.x = -1
-					self.status = 'left'
-				self.rand_walk_start = pygame.time.get_ticks()
+			# random AI
+			if self.model is None:
+				if pygame.time.get_ticks() - self.rand_walk_start > self.rand_walk_time:
+					dir = randint(1,4)
+					if dir == 1:
+						self.direction.y = -1
+						self.status = 'up'
+					elif dir == 2:
+						self.direction.y = 1
+						self.status = 'down'
+					elif dir == 3:
+						self.direction.x = 1
+						self.status = 'right'
+					else:
+						self.direction.x = -1
+						self.status = 'left'
+					self.rand_walk_start = pygame.time.get_ticks()
 
 	def get_status(self):
 		if self.direction.x == 0 and self.direction.y == 0:
@@ -131,6 +138,7 @@ class Agent(pygame.sprite.Sprite):
 		self.collision('horizontal')
 		self.hitbox.y += self.direction.y * speed
 		self.collision('vertical')
+		self.tile_change_test(self.rect.center,self.hitbox.center)
 		self.rect.center = self.hitbox.center
 
 	def attack_check(self,sprite):
@@ -167,6 +175,8 @@ class Agent(pygame.sprite.Sprite):
 	def cooldowns(self):
 		current_time = pygame.time.get_ticks()
 		if current_time - self.attack_time >= self.attack_cooldown:
+			if self.attacking:
+				self.can_save_frame = True
 			self.attacking = False
 	
 	def animate(self):
@@ -178,6 +188,17 @@ class Agent(pygame.sprite.Sprite):
 		
 		self.image = animation[int(self.frame_index)]
 		self.rect = self.image.get_rect(center = self.hitbox.center)
+
+	def tile_change_test(self,old_pos,new_pos):
+		# TODO add extra offset (TILESIZE * 1.5) to trigger near center of tile if this leads to garbage
+		if (old_pos[0] // TILESIZE  != new_pos[0] // TILESIZE) or (old_pos[1] // TILESIZE != new_pos[1] // TILESIZE):
+			self.can_save_frame = True
+
+	def save_data(self):
+		if self.can_save_frame:
+			self.save_data_frame()
+			self.can_save_frame = False
+
 
 	def update(self):
 		self.input()
