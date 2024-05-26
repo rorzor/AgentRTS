@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 from random import choice
 from settings import *
 from tile import Tile
@@ -39,7 +40,7 @@ class Level:
 
 		# spawn the landed ship
 		ship_surf = pygame.image.load('../graphics/ship/ship_1.png').convert_alpha()
-		Tile((64,64),[self.visible_sprites,self.obstacle_sprites],'ship',ship_surf)		
+		Tile((64,128),[self.visible_sprites,self.obstacle_sprites],'ship',ship_surf)		
 		
 		# create the layouts
 		layouts = {
@@ -123,14 +124,26 @@ class Level:
 								break
 
 	def save_data_frame(self):
-		# TODO write logic to save surrounding sprites by type and position
-		# must be in a 9x9 grid around the player_agent in the middle
-		# all other sprites within that field are placed into one of the remainign 'squares'
-		# should be called whenever the player inputs a move command, and save that command along with the grid at that time
-		#print(self.player_agent.rect.center)
+		nearby_sprites = []
+		data = np.zeros((2 * DATAFRAME_RADIUS + 1, 2 * DATAFRAME_RADIUS + 1), dtype=int)
+		data[(DATAFRAME_RADIUS,DATAFRAME_RADIUS)] = 99
+		x = self.player_agent.rect.center[0]
+		y = self.player_agent.rect.center[1]
+		# find all (collision) sprites near player agent
 		for sprite in self.obstacle_sprites:
-			pass
+			if sprite is not self.player_agent:				
+				if (x - (DATAFRAME_RADIUS+1) * TILESIZE) <= sprite.rect.center[0] <= (x + (DATAFRAME_RADIUS+1) * TILESIZE) and (y - (DATAFRAME_RADIUS+1) * TILESIZE) <= sprite.rect.center[1] <= (y + (DATAFRAME_RADIUS+1) * TILESIZE):
+					nearby_sprites.append(sprite)
 
+		for sprite in nearby_sprites:
+			posx = (sprite.rect[0]-x) // TILESIZE + DATAFRAME_RADIUS + 1
+			posy = (sprite.rect[1]-y) // TILESIZE + DATAFRAME_RADIUS + 1
+			try:
+				data[posy,posx] = SPRITE_CODES[sprite.sprite_type]
+			except:
+				pass
+			print(f'{sprite.sprite_type} at ({posx},{posy})')
+		print(data)
 	def run(self):
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player_agent)

@@ -42,3 +42,13 @@ resource_harvest = {
 weapon_data = {
     'sabre': {'cooldown': 100, 'damage': 15, 'graphic': '../graphics/weapons/sabre'}
 }
+
+# Dataframe variables
+DATAFRAME_RADIUS = 5
+SPRITE_CODES = {
+    'invisible' : 1,
+    'organic' : 2,
+    'mineral' : 3,
+    'agent' : 4,
+    'ship': 5
+}

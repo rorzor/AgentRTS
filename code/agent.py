@@ -67,24 +67,27 @@ class Agent(pygame.sprite.Sprite):
 				if keys[pygame.K_UP]:
 					self.direction.y = -1
 					self.status = 'up'
-					self.save_data_frame()
+					#self.save_data_frame()
 				elif keys[pygame.K_DOWN]:
 					self.direction.y = 1
 					self.status = 'down'
-					self.save_data_frame()
+					#self.save_data_frame()
 				else:
 					self.direction.y = 0
 
 				if keys[pygame.K_RIGHT]:
 					self.direction.x = 1
 					self.status = 'right'
-					self.save_data_frame()
+					#self.save_data_frame()
 				elif keys[pygame.K_LEFT]:
 					self.direction.x = -1
 					self.status = 'left'
-					self.save_data_frame()
+					#self.save_data_frame()
 				else:
 					self.direction.x = 0
+
+				if keys[pygame.K_SPACE]:
+					self.save_data_frame()
 		
 		else:
 			if pygame.time.get_ticks() - self.rand_walk_start > self.rand_walk_time:
