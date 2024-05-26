@@ -23,9 +23,9 @@ class Level:
 		self.attack_sprites = pygame.sprite.Group()
 		self.harvestable_sprites = pygame.sprite.Group()
 
-		self.player_agent = None
 		# create player
-		self.player = Player(self.player_agent,self.obstacle_sprites,self.spawn_agent)
+		self.player = Player(self.obstacle_sprites,self.spawn_agent)
+		self.player_agent = None
 
 		# sprite setup
 		self.create_map()
@@ -78,20 +78,30 @@ class Level:
 	def spawn_agent(self,players_agent = False):
 		# check if spawn location is free
 		for sprite in self.obstacle_sprites:
-			# if sprite.sprite_type == 'ship':
-			# 	continue
 			if 200 <= sprite.rect.center[0] <= 400 and 200 <= sprite.rect.center[1] <= 400:
 				return debug('Spawn Point Occupied')
 
-		# spawn agent.
 		if players_agent:
-			if self.player_agent is not None:
-				self.player_agent.kill()
-				if self.player.resources['agents'] > 0:
+			# spawn player's agent.
+			if self.player.resources['agents'] > 0:
 					self.player.resources['agents'] -= 1
-			self.player_agent = Agent(self.player,(300,300),[self.visible_sprites,self.obstacle_sprites],self.obstacle_sprites, self.create_attack)
+			if self.player_agent:
+				self.player_agent.kill()
+			self.player_agent = Agent(self.player,
+										True,
+										(300,300),
+										[self.visible_sprites,self.obstacle_sprites],
+										self.obstacle_sprites,
+										self.create_attack,
+										self.save_data_frame)
 		else:
-			Agent(self.player,(300,300),[self.visible_sprites,self.obstacle_sprites],self.obstacle_sprites, self.create_attack)
+			# spawn AI agent
+			Agent(self.player,
+				False,
+				(300,300),
+				[self.visible_sprites,self.obstacle_sprites],
+				self.obstacle_sprites,
+				self.create_attack)
 
 	def create_attack(self,agent):
 		Weapon(agent,[self.visible_sprites,self.attack_sprites])
@@ -111,6 +121,15 @@ class Level:
 								if target_sprite.capacity == 0:
 									target_sprite.kill()
 								break
+
+	def save_data_frame(self):
+		# TODO write logic to save surrounding sprites by type and position
+		# must be in a 9x9 grid around the player_agent in the middle
+		# all other sprites within that field are placed into one of the remainign 'squares'
+		# should be called whenever the player inputs a move command, and save that command along with the grid at that time
+		#print(self.player_agent.rect.center)
+		for sprite in self.obstacle_sprites:
+			pass
 
 	def run(self):
 		# update and draw the game

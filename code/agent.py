@@ -2,10 +2,17 @@ import pygame
 from settings import *
 from support import import_folder
 from debug import debug
-from weapon import Weapon
+from random import randint
 
 class Agent(pygame.sprite.Sprite):
-	def __init__(self,player,pos,groups,obstacle_sprites,create_attack):
+	def __init__(self,
+			  player,
+			  player_agent,
+			  pos,
+			  groups,
+			  obstacle_sprites,
+			  create_attack,
+			  save_data_frame = None):
 		super().__init__(groups)
 		self.image = pygame.image.load('../graphics/agent/down/idle_down.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
@@ -13,6 +20,7 @@ class Agent(pygame.sprite.Sprite):
 		self.obstacle_sprites = obstacle_sprites
 		self.sprite_type = 'agent'
 		self.player = player
+		self.is_player_agent = player_agent
 		self.player.resources['agents'] += 1
 
 		# graphics setup
@@ -31,6 +39,11 @@ class Agent(pygame.sprite.Sprite):
 		self.attacking = False
 		self.attack_cooldown = 300
 		self.attack_time = 0
+		self.rand_walk_time = 250
+		self.rand_walk_start = 0
+
+		# data frame saver
+		self.save_data_frame = save_data_frame
 
 		# weapons
 		self.create_attack = create_attack
@@ -48,28 +61,47 @@ class Agent(pygame.sprite.Sprite):
 			self.animations[animation] = import_folder(full_path)
 		
 	def input(self):
-		keys = pygame.key.get_pressed()
+		if self.is_player_agent:
+			keys = pygame.key.get_pressed()
+			if not self.attacking:
+				if keys[pygame.K_UP]:
+					self.direction.y = -1
+					self.status = 'up'
+					self.save_data_frame()
+				elif keys[pygame.K_DOWN]:
+					self.direction.y = 1
+					self.status = 'down'
+					self.save_data_frame()
+				else:
+					self.direction.y = 0
 
-		if not self.attacking:
-			if keys[pygame.K_UP]:
-				self.direction.y = -1
-				self.status = 'up'
-			elif keys[pygame.K_DOWN]:
-				self.direction.y = 1
-				self.status = 'down'
-
-			else:
-				self.direction.y = 0
-
-			if keys[pygame.K_RIGHT]:
-				self.direction.x = 1
-				self.status = 'right'
-
-			elif keys[pygame.K_LEFT]:
-				self.direction.x = -1
-				self.status = 'left'
-			else:
-				self.direction.x = 0
+				if keys[pygame.K_RIGHT]:
+					self.direction.x = 1
+					self.status = 'right'
+					self.save_data_frame()
+				elif keys[pygame.K_LEFT]:
+					self.direction.x = -1
+					self.status = 'left'
+					self.save_data_frame()
+				else:
+					self.direction.x = 0
+		
+		else:
+			if pygame.time.get_ticks() - self.rand_walk_start > self.rand_walk_time:
+				dir = randint(1,4)
+				if dir == 1:
+					self.direction.y = -1
+					self.status = 'up'
+				elif dir == 2:
+					self.direction.y = 1
+					self.status = 'down'
+				elif dir == 3:
+					self.direction.x = 1
+					self.status = 'right'
+				else:
+					self.direction.x = -1
+					self.status = 'left'
+				self.rand_walk_start = pygame.time.get_ticks()
 
 	def get_status(self):
 		if self.direction.x == 0 and self.direction.y == 0:
