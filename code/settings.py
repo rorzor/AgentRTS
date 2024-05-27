@@ -38,6 +38,14 @@ resource_harvest = {
     'mineral' : 0.1
 }
 
+# Resource consumption rates
+resource_consumption = {
+    'agent_min_harvest': 1,      # energy
+    'agent_org_harvest': 1,      # energy
+    'agent_move': 0.01,             # energy
+    'agent_spawn': 10               # organic
+}
+
 # weapons
 weapon_data = {
     'sabre': {'cooldown': 100, 'damage': 15, 'graphic': '../graphics/weapons/sabre'}

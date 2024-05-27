@@ -86,6 +86,7 @@ class Level:
 			# spawn player's agent.
 			if self.player.resources['agents'] > 0:
 					self.player.resources['agents'] -= 1
+			self.player.resources['organic'] -= resource_consumption['agent_spawn']
 			if self.player_agent:
 				self.player_agent.kill()
 			self.player_agent = Agent(self.player,
@@ -97,6 +98,11 @@ class Level:
 										self.save_data_frame)
 		else:
 			# spawn AI agent
+			if self.player.resources['organic'] < 10:
+				return debug('Insufficient Organic Resources') 
+			
+			self.player.resources['organic'] -= resource_consumption['agent_spawn']
+
 			Agent(self.player,
 				False,
 				(300,300),

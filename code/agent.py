@@ -133,6 +133,7 @@ class Agent(pygame.sprite.Sprite):
 	def move(self,speed):
 		if self.direction.magnitude() != 0:
 			self.direction = self.direction.normalize()
+			self.energy -= resource_consumption['agent_move']
 
 		self.hitbox.x += self.direction.x * speed
 		self.collision('horizontal')
@@ -148,6 +149,12 @@ class Agent(pygame.sprite.Sprite):
 			self.attack_time = pygame.time.get_ticks()
 			self.attacking = True
 			self.create_attack(self)
+			if sprite.sprite_type == 'organic':
+				self.energy += resource_consumption['agent_org_harvest']
+				if self.energy >= self.stats['energy']:
+					self.energy = self.stats['energy']
+			elif sprite.sprite_type == 'mineral':
+				self.energy -= resource_consumption['agent_min_harvest']
 
 	def collision(self,direction):
 		if direction == 'horizontal':
@@ -199,9 +206,20 @@ class Agent(pygame.sprite.Sprite):
 			self.save_data_frame()
 			self.can_save_frame = False
 
+	def low_health_energy_check(self):
+		if self.energy < 0:
+			self.health += self.energy
+			self.energy = 0
+		if self.health <= 0:
+			if self.is_player_agent:
+				self.player.spawn_agent(True)
+			else:
+				self.kill()
+				self.player.resources['agents'] -= 1
 
 	def update(self):
 		self.input()
+		self.low_health_energy_check()
 		self.cooldowns()
 		self.get_status()
 		self.animate()
