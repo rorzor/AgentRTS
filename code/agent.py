@@ -1,4 +1,5 @@
-import pygame 
+import pygame
+import numpy as np
 from settings import *
 from support import import_folder
 from debug import debug
@@ -12,7 +13,8 @@ class Agent(pygame.sprite.Sprite):
 			  groups,
 			  obstacle_sprites,
 			  create_attack,
-			  save_data_frame = None):
+			  get_data_frame,
+			  model = None):
 		super().__init__(groups)
 		self.image = pygame.image.load('../graphics/agent/down/idle_down.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
@@ -43,16 +45,18 @@ class Agent(pygame.sprite.Sprite):
 		self.rand_walk_start = 0
 
 		# data frame saver
-		self.save_data_frame = save_data_frame
-		self.can_save_frame = True
-
-		# AI model
-		self.model = None
+		self.get_data_frame = get_data_frame
+		self.can_get_frame = True
 
 		# weapons
 		self.create_attack = create_attack
 		self.weapon_index = 0
 		self.weapon = list(weapon_data.keys())[self.weapon_index]
+
+		# ai model prediction
+		self.can_make_prediction = True
+		self.prediction_start = 0
+		self.prediction_cooldown = 500
 
 	def import_agent_assets(self):
 		path = '../graphics/agent/'
@@ -65,9 +69,9 @@ class Agent(pygame.sprite.Sprite):
 			self.animations[animation] = import_folder(full_path)
 		
 	def input(self):
-		if self.is_player_agent:
-			keys = pygame.key.get_pressed()
-			if not self.attacking:
+		if not self.attacking:
+			if self.is_player_agent:				# Player input logic
+				keys = pygame.key.get_pressed()
 				if keys[pygame.K_UP]:
 					self.direction.y = -1
 					self.status = 'up'
@@ -92,26 +96,46 @@ class Agent(pygame.sprite.Sprite):
 				else:
 					self.direction.x = 0
 
-				if keys[pygame.K_SPACE]:
-					self.save_data_frame()
-		else:
-			# random AI
-			if self.model is None:
-				if pygame.time.get_ticks() - self.rand_walk_start > self.rand_walk_time:
-					dir = randint(1,4)
-					if dir == 1:
-						self.direction.y = -1
-						self.status = 'up'
-					elif dir == 2:
-						self.direction.y = 1
-						self.status = 'down'
-					elif dir == 3:
-						self.direction.x = 1
-						self.status = 'right'
-					else:
-						self.direction.x = -1
-						self.status = 'left'
-					self.rand_walk_start = pygame.time.get_ticks()
+			else:
+				if self.player.modeller.model is None:  			# AI random logic
+					if pygame.time.get_ticks() - self.rand_walk_start > self.rand_walk_time:
+						dir = randint(1,4)
+						if dir == 1:
+							self.direction.y = -1
+							self.status = 'up'
+						elif dir == 2:
+							self.direction.y = 1
+							self.status = 'down'
+						elif dir == 3:
+							self.direction.x = 1
+							self.status = 'right'
+						else:
+							self.direction.x = -1
+							self.status = 'left'
+						self.rand_walk_start = pygame.time.get_ticks()
+				else: 								# AI trained model
+					if self.can_make_prediction:
+						nearby_sprites = self.get_data_frame(self)
+						decision = self.predict_action(nearby_sprites)
+						print('Prediction being made')
+						if decision == 'up':
+							self.direction.y = -1
+							self.direction.x = 0
+							self.status = 'up'
+						elif decision == 'down':
+							self.direction.y = 1
+							self.direction.x = 0
+							self.status = 'down'
+						elif decision == 'left':
+							self.direction.y = 0
+							self.direction.x = -1
+							self.status = 'left'
+						elif decision == 'right':
+							self.direction.y = 0
+							self.direction.x = 1
+							self.status = 'right'
+						self.can_make_prediction = False
+						self.prediction_start = pygame.time.get_ticks()
 
 	def get_status(self):
 		if self.direction.x == 0 and self.direction.y == 0:
@@ -183,8 +207,11 @@ class Agent(pygame.sprite.Sprite):
 		current_time = pygame.time.get_ticks()
 		if current_time - self.attack_time >= self.attack_cooldown:
 			if self.attacking:
-				self.can_save_frame = True
+				self.can_get_frame = True
 			self.attacking = False
+		
+		if current_time - self.prediction_start >= self.prediction_cooldown:
+			self.can_make_prediction = True
 	
 	def animate(self):
 		animation = self.animations[self.status]
@@ -198,13 +225,21 @@ class Agent(pygame.sprite.Sprite):
 
 	def tile_change_test(self,old_pos,new_pos):
 		# TODO add extra offset (TILESIZE * 1.5) to trigger near center of tile if this leads to garbage
+		# potentiallly trigger save_data() from here when moving past tile boundary
 		if (old_pos[0] // TILESIZE  != new_pos[0] // TILESIZE) or (old_pos[1] // TILESIZE != new_pos[1] // TILESIZE):
-			self.can_save_frame = True
+			self.can_get_frame = True
+
+	def data_frame_size_check(self):
+		if len(self.player.data_set) >= self.player.max_data_frame_size and self.is_player_agent:
+			debug('Data frame size is at max')
+			self.can_get_frame = False
 
 	def save_data(self):
-		if self.can_save_frame:
-			self.save_data_frame()
-			self.can_save_frame = False
+		if len(self.player.data_set) >= self.player.max_data_frame_size:
+			return debug('Data frame size is at max')
+		if self.can_get_frame:
+			self.player.data_set.append({'matrix': self.get_data_frame(self), 'label': self.status})
+			self.can_get_frame = False
 
 	def low_health_energy_check(self):
 		if self.energy < 0:
@@ -217,10 +252,36 @@ class Agent(pygame.sprite.Sprite):
 				self.kill()
 				self.player.resources['agents'] -= 1
 
+	def predict_action(self,boardstate):
+		boardstate = boardstate / len(SPRITE_CODES) # normalise
+		instance = boardstate.reshape(1, 11, 11, 1)
+
+		# Make a prediction
+		prediction = self.player.modeller.model.predict(instance,verbose = 0)[0]
+		#print(f'Prediction confidence: {prediction}')
+		
+		random_fact = randint(1,4)
+
+		if random_fact == 1:
+			# Sample from the probability distribution
+			predicted_class_index = np.random.choice(len(prediction), p=prediction)
+		else:
+			# Get the class index with the highest probability
+			predicted_class_index = np.argmax(prediction)
+
+		# Optionally, convert the index to a label
+		predicted_label = list(self.player.modeller.label_dict.keys())[predicted_class_index]
+		
+		# Print or process the result as needed
+		#print(f"Predicted action = {predicted_label}")
+		return predicted_label
+
 	def update(self):
 		self.input()
 		self.low_health_energy_check()
 		self.cooldowns()
 		self.get_status()
 		self.animate()
+		self.data_frame_size_check()
 		self.move(self.stats['speed'])
+

@@ -21,6 +21,8 @@ df_test = pd.read_csv('training_dataTEST.csv')
 
 # Convert the 'matrix' column to 9x9 numpy arrays
 df['matrix'] = df['matrix'].apply(string_to_matrix)
+print(df['matrix'])
+
 df_test['matrix'] = df_test['matrix'].apply(string_to_matrix)
 
 # Drop rows where the conversion failed

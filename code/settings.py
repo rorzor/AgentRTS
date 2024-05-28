@@ -1,7 +1,7 @@
 # game setup
 WIDTH    = 1280	
 HEIGTH   = 720
-FPS      = 60
+FPS      = 120
 TILESIZE = 64
 
 MAPHEIGHT = 100
@@ -28,7 +28,7 @@ UI_BORDER_COLOR_ACTIVE = 'gold'
 
 # resources spawning variables
 RESOURCEBUFFER = 10
-ORGANICPROB = 0.08
+ORGANICPROB = 0.15
 STARTINGMINERAL = 20
 MINSPACING = 8
 
@@ -53,6 +53,7 @@ weapon_data = {
 
 # Dataframe variables
 DATAFRAME_RADIUS = 5
+MAX_FRAME_SIZE = 200
 SPRITE_CODES = {
     'invisible' : 1,
     'organic' : 2,
@@ -60,3 +61,4 @@ SPRITE_CODES = {
     'agent' : 4,
     'ship': 5
 }
+

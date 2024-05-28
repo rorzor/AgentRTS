@@ -13,7 +13,7 @@ class UI:
         self.energy_bar_rect = pygame.Rect(10,34,ENERGY_BAR_WIDTH, BAR_HEIGHT)
 
     def show_resources(self,player):
-        x = self.display_surface.get_size()[0] - 200
+        x = self.display_surface.get_size()[0] - 300
 
         # show organics
         text_surf = self.font.render('Organic: ' + str(int(player.resources['organic'])),False,TEXT_COLOR)
@@ -30,6 +30,11 @@ class UI:
         text_rect = text_surf.get_rect(topleft = (x,50))
         self.display_surface.blit(text_surf,text_rect)
 
+        # show data frames
+        text_surf = self.font.render('Data Frames: ' + str(int(len(player.data_set))) + '/' + str(int(player.max_data_frame_size)),False,TEXT_COLOR)
+        text_rect = text_surf.get_rect(topleft = (x,70))
+        self.display_surface.blit(text_surf,text_rect)
+
     def show_bar(self,current,max_amount,bg_rect,color):
 
         # draw background
@@ -44,7 +49,6 @@ class UI:
         # drawing the bar
         pygame.draw.rect(self.display_surface,color,current_rect)
         pygame.draw.rect(self.display_surface,UI_BORDER_COLOR,bg_rect,3)
-
 
     def display(self,player,agent):
         self.show_bar(agent.health,agent.stats['health'],self.health_bar_rect,HEALTH_COLOR)

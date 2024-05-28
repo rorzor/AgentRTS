@@ -10,6 +10,7 @@ from weapon import Weapon
 from player import Player
 from ui import UI
 from resources import Resource
+from modeller import Modeller
 
 class Level:
 	def __init__(self):
@@ -24,8 +25,11 @@ class Level:
 		self.attack_sprites = pygame.sprite.Group()
 		self.harvestable_sprites = pygame.sprite.Group()
 
+		# model trainer
+		self.modeller = Modeller()
+
 		# create player
-		self.player = Player(self.obstacle_sprites,self.spawn_agent)
+		self.player = Player(self.obstacle_sprites,self.spawn_agent,self.modeller)
 		self.player_agent = None
 
 		# sprite setup
@@ -95,7 +99,9 @@ class Level:
 										[self.visible_sprites,self.obstacle_sprites],
 										self.obstacle_sprites,
 										self.create_attack,
-										self.save_data_frame)
+										self.get_data_frame)
+			print("Respawn player's agent")
+
 		else:
 			# spawn AI agent
 			if self.player.resources['organic'] < 10:
@@ -108,7 +114,10 @@ class Level:
 				(300,300),
 				[self.visible_sprites,self.obstacle_sprites],
 				self.obstacle_sprites,
-				self.create_attack)
+				self.create_attack,
+				self.get_data_frame)
+			
+			print('Spawn new agent')
 
 	def create_attack(self,agent):
 		Weapon(agent,[self.visible_sprites,self.attack_sprites])
@@ -129,15 +138,15 @@ class Level:
 									target_sprite.kill()
 								break
 
-	def save_data_frame(self):
+	def get_data_frame(self,agent):
 		nearby_sprites = []
 		data = np.zeros((2 * DATAFRAME_RADIUS + 1, 2 * DATAFRAME_RADIUS + 1), dtype=int)
-		data[(DATAFRAME_RADIUS,DATAFRAME_RADIUS)] = 99
-		x = self.player_agent.rect.center[0]
-		y = self.player_agent.rect.center[1]
+		data[(DATAFRAME_RADIUS,DATAFRAME_RADIUS)] = -1
+		x = agent.rect.center[0]
+		y = agent.rect.center[1]
 		# find all (collision) sprites near player agent
 		for sprite in self.obstacle_sprites:
-			if sprite is not self.player_agent:				
+			if sprite is not agent:				
 				if (x - (DATAFRAME_RADIUS+1) * TILESIZE) <= sprite.rect.center[0] <= (x + (DATAFRAME_RADIUS+1) * TILESIZE) and (y - (DATAFRAME_RADIUS+1) * TILESIZE) <= sprite.rect.center[1] <= (y + (DATAFRAME_RADIUS+1) * TILESIZE):
 					nearby_sprites.append(sprite)
 
@@ -148,8 +157,9 @@ class Level:
 				data[posy,posx] = SPRITE_CODES[sprite.sprite_type]
 			except:
 				pass
-			print(f'{sprite.sprite_type} at ({posx},{posy})')
-		print(data)
+			#print(f'{sprite.sprite_type} at ({posx},{posy})')
+		return data.flatten()
+
 	def run(self):
 		# update and draw the game
 		self.visible_sprites.custom_draw(self.player_agent)
