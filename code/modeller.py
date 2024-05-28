@@ -19,7 +19,7 @@ class Modeller:
         clean_string = matrix_string.strip("[]")
         try:
             # Convert string to float list
-            matrix = np.array(clean_string.split(), dtype=float).reshape(11, 11)
+            matrix = np.array(clean_string.split(), dtype=float).reshape(2*DATAFRAME_RADIUS+1, 2*DATAFRAME_RADIUS+1)
             return matrix
         except ValueError:
             # This will catch strings that don't split into 81 items
@@ -52,12 +52,12 @@ class Modeller:
         #yt = to_categorical(df_test['label'].map(label_dict))  # Convert labels to one-hot encoding
 
         # Reshape input data to fit Keras's CNN input requirements
-        X = X.reshape(X.shape[0], 11, 11, 1)  # Add channel dimension
+        X = X.reshape(X.shape[0], 2*DATAFRAME_RADIUS+1, 2*DATAFRAME_RADIUS+1, 1)  # Add channel dimension
         #Xt = Xt.reshape(Xt.shape[0], 11, 11, 1)  # Add channel dimension
 
         # Define the CNN Architecture
         model = Sequential([
-            Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(11, 11, 1)),
+            Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(2*DATAFRAME_RADIUS+1, 2*DATAFRAME_RADIUS+1, 1)),
             MaxPooling2D(pool_size=(2, 2)),
             Flatten(),
             Dense(128, activation='relu'),

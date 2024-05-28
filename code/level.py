@@ -141,7 +141,7 @@ class Level:
 	def get_data_frame(self,agent):
 		nearby_sprites = []
 		data = np.zeros((2 * DATAFRAME_RADIUS + 1, 2 * DATAFRAME_RADIUS + 1), dtype=int)
-		data[(DATAFRAME_RADIUS,DATAFRAME_RADIUS)] = -1
+		data[(DATAFRAME_RADIUS,DATAFRAME_RADIUS)] = 0
 		x = agent.rect.center[0]
 		y = agent.rect.center[1]
 		# find all (collision) sprites near player agent

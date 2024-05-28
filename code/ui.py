@@ -35,6 +35,14 @@ class UI:
         text_rect = text_surf.get_rect(topleft = (x,70))
         self.display_surface.blit(text_surf,text_rect)
 
+    def show_recording(self,player):
+        x = self.display_surface.get_size()[0] / 2 - 100
+        state = 'ON' if player.can_record_frame else 'OFF'
+        colour = RECORDING if player.can_record_frame else NOT_RECORDING
+        text_surf = self.font.render(f'Recording: {state}',False,colour)
+        text_rect = text_surf.get_rect(topleft = (x,10))
+        self.display_surface.blit(text_surf,text_rect)
+
     def show_bar(self,current,max_amount,bg_rect,color):
 
         # draw background
@@ -53,6 +61,6 @@ class UI:
     def display(self,player,agent):
         self.show_bar(agent.health,agent.stats['health'],self.health_bar_rect,HEALTH_COLOR)
         self.show_bar(agent.energy,agent.stats['energy'],self.energy_bar_rect,ENERGY_COLOR)
-
+        self.show_recording(player)
         self.show_resources(player)
         pass

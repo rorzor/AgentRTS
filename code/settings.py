@@ -25,11 +25,13 @@ TEXT_COLOR = '#EEEEEE'
 HEALTH_COLOR = 'red'
 ENERGY_COLOR = 'blue'
 UI_BORDER_COLOR_ACTIVE = 'gold'
+RECORDING = '#fc0a0e'
+NOT_RECORDING = '#21b903'
 
 # resources spawning variables
 RESOURCEBUFFER = 10
-ORGANICPROB = 0.15
-STARTINGMINERAL = 20
+ORGANICPROB = 0.10
+STARTINGMINERAL = 60
 MINSPACING = 8
 
 # Resource harvest rates
@@ -52,7 +54,7 @@ weapon_data = {
 }
 
 # Dataframe variables
-DATAFRAME_RADIUS = 5
+DATAFRAME_RADIUS = 4
 MAX_FRAME_SIZE = 200
 SPRITE_CODES = {
     'invisible' : 1,
