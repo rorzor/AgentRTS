@@ -25,12 +25,16 @@ TEXT_COLOR = '#EEEEEE'
 HEALTH_COLOR = 'red'
 ENERGY_COLOR = 'blue'
 UI_BORDER_COLOR_ACTIVE = 'gold'
+RECORDING = '#fc0a0e'
+NOT_RECORDING = '#21b903'
 
 # resources spawning variables
 RESOURCEBUFFER = 10
-ORGANICPROB = 0.15
+ORGANICPROB = 0.10
+MINERALPROB = 0.99
 STARTINGMINERAL = 20
 MINSPACING = 8
+SEED_SPAWN = 0.005
 
 # Resource harvest rates
 resource_harvest = {
@@ -41,7 +45,7 @@ resource_harvest = {
 # Resource consumption rates
 resource_consumption = {
     'agent_min_harvest': 1,      # energy
-    'agent_org_harvest': 1,      # energy
+    'agent_org_harvest': 2,      # energy
     'agent_move': 0.01,             # energy
     'agent_spawn': 10               # organic
 }
@@ -52,7 +56,7 @@ weapon_data = {
 }
 
 # Dataframe variables
-DATAFRAME_RADIUS = 5
+DATAFRAME_RADIUS = 4
 MAX_FRAME_SIZE = 200
 SPRITE_CODES = {
     'invisible' : 1,

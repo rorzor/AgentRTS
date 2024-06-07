@@ -31,8 +31,13 @@ class Level:
 		# create player
 		self.player = Player(self.obstacle_sprites,self.spawn_agent,self.modeller)
 		self.player_agent = None
-
+		
 		# sprite setup
+		self.graphics = {
+			'organics': import_folder('../graphics/organics/plants'),
+			'minerals': import_folder('../graphics/minerals'),
+			'seeds': 	import_folder('../graphics/organics/seeds')
+		}
 		self.create_map()
 
 		# user interface
@@ -51,10 +56,6 @@ class Level:
 			'boundary': create_boundary(),
 			'resources': create_resources()
 		}
-		graphics = {
-			'organics': import_folder('../graphics/organics'),
-			'minerals': import_folder('../graphics/minerals')
-		}
 
 		for style,layout in layouts.items():
 			for row_index,row in enumerate(layout):
@@ -67,14 +68,15 @@ class Level:
 						if style == 'resources':
 							# spawn organics
 							if col == 51:
-								random_plant_image = choice(graphics['organics'])
+								random_plant_image = choice(self.graphics['organics'])
 								Resource((x,y),
 			 						[self.visible_sprites,self.obstacle_sprites,self.harvestable_sprites],
 									'organic',
-									random_plant_image)
+									random_plant_image,
+									self.create_organic)
 							# spawn minerals
 							if col == 52:
-								random_mineral_image = choice(graphics['minerals'])
+								random_mineral_image = choice(self.graphics['minerals'])
 								Resource((x,y),
 			 						[self.visible_sprites,self.obstacle_sprites,self.harvestable_sprites],
 									'mineral',
@@ -135,19 +137,21 @@ class Level:
 								self.player.resources[resource_type] += resource_harvest[resource_type]
 								attack_sprite.harvesting = True
 								if target_sprite.capacity == 0:
+									self.create_organic(target_sprite.rect.topleft,'seed')
 									target_sprite.kill()
 								break
 
 	def get_data_frame(self,agent):
 		nearby_sprites = []
 		data = np.zeros((2 * DATAFRAME_RADIUS + 1, 2 * DATAFRAME_RADIUS + 1), dtype=int)
-		data[(DATAFRAME_RADIUS,DATAFRAME_RADIUS)] = -1
+		data[(DATAFRAME_RADIUS,DATAFRAME_RADIUS)] = 0
 		x = agent.rect.center[0]
 		y = agent.rect.center[1]
+		pixel_distance = (DATAFRAME_RADIUS+1) * TILESIZE
 		# find all (collision) sprites near player agent
 		for sprite in self.obstacle_sprites:
 			if sprite is not agent:				
-				if (x - (DATAFRAME_RADIUS+1) * TILESIZE) <= sprite.rect.center[0] <= (x + (DATAFRAME_RADIUS+1) * TILESIZE) and (y - (DATAFRAME_RADIUS+1) * TILESIZE) <= sprite.rect.center[1] <= (y + (DATAFRAME_RADIUS+1) * TILESIZE):
+				if abs(sprite.rect.center[0] - x)  <= pixel_distance and abs(sprite.rect.center[1] - y)  <= pixel_distance:
 					nearby_sprites.append(sprite)
 
 		for sprite in nearby_sprites:
@@ -157,8 +161,33 @@ class Level:
 				data[posy,posx] = SPRITE_CODES[sprite.sprite_type]
 			except:
 				pass
-			#print(f'{sprite.sprite_type} at ({posx},{posy})')
 		return data.flatten()
+
+	def sprout(self,seed):
+		for sprite in self.obstacle_sprites:
+			if sprite.sprite_type == 'agent':
+				if abs(sprite.rect.center[0] - seed.rect.center[0]) < 100 and abs(sprite.rect.center[1] - seed.rect.center[1]) < 100 :
+					return
+		self.create_organic(seed.pos,'organic')
+		seed.kill()
+
+
+	def create_organic(self,pos,type):
+		if type == 'organic':
+			random_plant_image = choice(self.graphics['organics'])
+			Resource(pos,
+				[self.visible_sprites,self.obstacle_sprites,self.harvestable_sprites],
+				'organic',
+				random_plant_image)
+		elif type == 'seed':
+			seed_image = choice(self.graphics['seeds'])
+			Resource(pos,
+				[self.visible_sprites],
+				'seed',
+				seed_image,
+				self.create_organic,
+				self.sprout
+				)
 
 	def run(self):
 		# update and draw the game
@@ -192,7 +221,20 @@ class YSortCameraGroup(pygame.sprite.Group):
 		floor_offset_pos = self.floow_rect.topleft - self.offset
 		self.display_surface.blit(self.floor_surface,floor_offset_pos)
 
-		# for sprite in self.sprites():
+		# draw the seeds (or anything else on the floor)
 		for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
+			try:
+				if sprite.sprite_type == 'seed':
+					offset_pos = sprite.rect.topleft - self.offset
+					self.display_surface.blit(sprite.image,offset_pos)
+			except:
+				pass
+		#draw 3D objects
+		for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
+			try:
+				if sprite.sprite_type == 'seed':
+					continue
+			except:
+				pass
 			offset_pos = sprite.rect.topleft - self.offset
 			self.display_surface.blit(sprite.image,offset_pos)

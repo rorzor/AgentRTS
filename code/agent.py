@@ -4,6 +4,7 @@ from settings import *
 from support import import_folder
 from debug import debug
 from random import randint
+from keras.activations import softmax
 
 class Agent(pygame.sprite.Sprite):
 	def __init__(self,
@@ -13,8 +14,7 @@ class Agent(pygame.sprite.Sprite):
 			  groups,
 			  obstacle_sprites,
 			  create_attack,
-			  get_data_frame,
-			  model = None):
+			  get_data_frame):
 		super().__init__(groups)
 		self.image = pygame.image.load('../graphics/agent/down/idle_down.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
@@ -32,7 +32,7 @@ class Agent(pygame.sprite.Sprite):
 		self.animation_speed = 0.15
 
 		# stats
-		self.stats = {'health': 10, 'energy': 10, 'speed': 4}
+		self.stats = {'health': 10, 'energy': 10, 'speed': 3}
 		self.health = self.stats['health']
 		self.energy = self.stats['energy']
 
@@ -70,7 +70,7 @@ class Agent(pygame.sprite.Sprite):
 		
 	def input(self):
 		if not self.attacking:
-			if self.is_player_agent:				# Player input logic
+			if self.is_player_agent:					# Player input logic
 				keys = pygame.key.get_pressed()
 				if keys[pygame.K_UP]:
 					self.direction.y = -1
@@ -95,9 +95,9 @@ class Agent(pygame.sprite.Sprite):
 
 				else:
 					self.direction.x = 0
-
-			else:
-				if self.player.modeller.model is None:  			# AI random logic
+				# debug(f'{self.rect.center[0] // TILESIZE}' + ' - ' + f'{self.rect.center[1] // TILESIZE}')
+			else:										# AI logic
+				if self.player.modeller.model is None:  # AI random logic
 					if pygame.time.get_ticks() - self.rand_walk_start > self.rand_walk_time:
 						dir = randint(1,4)
 						if dir == 1:
@@ -113,11 +113,10 @@ class Agent(pygame.sprite.Sprite):
 							self.direction.x = -1
 							self.status = 'left'
 						self.rand_walk_start = pygame.time.get_ticks()
-				else: 								# AI trained model
+				else: 									# AI trained model
 					if self.can_make_prediction:
 						nearby_sprites = self.get_data_frame(self)
 						decision = self.predict_action(nearby_sprites)
-						print('Prediction being made')
 						if decision == 'up':
 							self.direction.y = -1
 							self.direction.x = 0
@@ -236,8 +235,8 @@ class Agent(pygame.sprite.Sprite):
 
 	def save_data(self):
 		if len(self.player.data_set) >= self.player.max_data_frame_size:
-			return debug('Data frame size is at max')
-		if self.can_get_frame:
+			return
+		if self.can_get_frame and self.player.can_record_frame:
 			self.player.data_set.append({'matrix': self.get_data_frame(self), 'label': self.status})
 			self.can_get_frame = False
 
@@ -254,26 +253,20 @@ class Agent(pygame.sprite.Sprite):
 
 	def predict_action(self,boardstate):
 		boardstate = boardstate / len(SPRITE_CODES) # normalise
-		instance = boardstate.reshape(1, 11, 11, 1)
-
-		# Make a prediction
-		prediction = self.player.modeller.model.predict(instance,verbose = 0)[0]
-		#print(f'Prediction confidence: {prediction}')
-		
-		random_fact = randint(1,4)
-
+		instance = boardstate.reshape(1, 2*DATAFRAME_RADIUS+1, 2*DATAFRAME_RADIUS+1, 1)
+		prediction = self.player.modeller.model(instance)[0]
+		random_fact = randint(1,6)
 		if random_fact == 1:
 			# Sample from the probability distribution
-			predicted_class_index = np.random.choice(len(prediction), p=prediction)
+			probabilities = softmax(prediction).numpy()
+			predicted_class_index = np.random.choice(len(prediction), p=probabilities)
 		else:
 			# Get the class index with the highest probability
 			predicted_class_index = np.argmax(prediction)
 
 		# Optionally, convert the index to a label
 		predicted_label = list(self.player.modeller.label_dict.keys())[predicted_class_index]
-		
-		# Print or process the result as needed
-		#print(f"Predicted action = {predicted_label}")
+
 		return predicted_label
 
 	def update(self):

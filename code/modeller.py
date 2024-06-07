@@ -6,6 +6,9 @@ from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 from keras.saving import load_model
 from settings import *
 
+from settings import *
+
+
 class Modeller:
     def __init__(self):
         self.model = None
@@ -19,7 +22,7 @@ class Modeller:
         clean_string = matrix_string.strip("[]")
         try:
             # Convert string to float list
-            matrix = np.array(clean_string.split(), dtype=float).reshape(11, 11)
+            matrix = np.array(clean_string.split(), dtype=float).reshape(2*DATAFRAME_RADIUS+1, 2*DATAFRAME_RADIUS+1)
             return matrix
         except ValueError:
             # This will catch strings that don't split into 81 items
@@ -50,28 +53,35 @@ class Modeller:
         label_dict = {label: idx for idx, label in enumerate(['up', 'down', 'left', 'right'])}
         y = to_categorical(df['label'].map(label_dict))  # Convert labels to one-hot encoding
         #yt = to_categorical(df_test['label'].map(label_dict))  # Convert labels to one-hot encoding
-
+        print('found categorical')
         # Reshape input data to fit Keras's CNN input requirements
-        X = X.reshape(X.shape[0], 11, 11, 1)  # Add channel dimension
+        X = X.reshape(X.shape[0], 2*DATAFRAME_RADIUS+1, 2*DATAFRAME_RADIUS+1, 1)  # Add channel dimension
         #Xt = Xt.reshape(Xt.shape[0], 11, 11, 1)  # Add channel dimension
 
         # Define the CNN Architecture
         model = Sequential([
-            Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(11, 11, 1)),
+            Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(2*DATAFRAME_RADIUS+1, 2*DATAFRAME_RADIUS+1, 1)),
             MaxPooling2D(pool_size=(2, 2)),
             Flatten(),
             Dense(128, activation='relu'),
             Dense(4, activation='softmax')  # Assuming 4 classes for 'up', 'down', 'left', 'right'
         ])
+        print('Made model')
 
         model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+        print('Compiled model')
 
         # Train the model
         model.fit(X, y, epochs=10, batch_size=32, validation_split=0.1)
-        model.save("test_model.keras", overwrite=True)
-        self.model_loader()
-        # This would require us to have a separate test set
+        print('Fit model')
+        print(model.summary())
 
+        
+        model.save("test_model.keras", overwrite=True)
+
+        self.model_loader()
+        
+        # This would require us to have a separate test set
         #test_loss, test_acc = model.evaluate(Xt, yt)
         #print(f"Test Accuracy: {test_acc}")
 
