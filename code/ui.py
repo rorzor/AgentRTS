@@ -35,6 +35,12 @@ class UI:
         text_rect = text_surf.get_rect(topleft = (x,70))
         self.display_surface.blit(text_surf,text_rect)
 
+        # show model
+        model = 'Random' if player.modeller.model is None else 'AI'
+        text_surf = self.font.render(f'Model: {model}',False,TEXT_COLOR)
+        text_rect = text_surf.get_rect(topleft = (x,90))
+        self.display_surface.blit(text_surf,text_rect)
+
     def show_recording(self,player):
         x = self.display_surface.get_size()[0] / 2 - 100
         state = 'ON' if player.can_record_frame else 'OFF'

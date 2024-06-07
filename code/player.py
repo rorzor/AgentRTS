@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 import pandas as pd
+from debug import debug
 
 class Player:
     def __init__(self,obstacle_sprites,spawn_agent,modeller):

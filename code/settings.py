@@ -31,8 +31,10 @@ NOT_RECORDING = '#21b903'
 # resources spawning variables
 RESOURCEBUFFER = 10
 ORGANICPROB = 0.10
-STARTINGMINERAL = 60
+MINERALPROB = 0.99
+STARTINGMINERAL = 20
 MINSPACING = 8
+SEED_SPAWN = 0.005
 
 # Resource harvest rates
 resource_harvest = {
@@ -43,7 +45,7 @@ resource_harvest = {
 # Resource consumption rates
 resource_consumption = {
     'agent_min_harvest': 1,      # energy
-    'agent_org_harvest': 1,      # energy
+    'agent_org_harvest': 2,      # energy
     'agent_move': 0.01,             # energy
     'agent_spawn': 10               # organic
 }

@@ -95,7 +95,7 @@ class Agent(pygame.sprite.Sprite):
 
 				else:
 					self.direction.x = 0
-
+				# debug(f'{self.rect.center[0] // TILESIZE}' + ' - ' + f'{self.rect.center[1] // TILESIZE}')
 			else:										# AI logic
 				if self.player.modeller.model is None:  # AI random logic
 					if pygame.time.get_ticks() - self.rand_walk_start > self.rand_walk_time:
@@ -254,12 +254,8 @@ class Agent(pygame.sprite.Sprite):
 	def predict_action(self,boardstate):
 		boardstate = boardstate / len(SPRITE_CODES) # normalise
 		instance = boardstate.reshape(1, 2*DATAFRAME_RADIUS+1, 2*DATAFRAME_RADIUS+1, 1)
-
-		# Make a prediction
-		#prediction = self.player.modeller.model.predict(instance,verbose = 0)[0]
 		prediction = self.player.modeller.model(instance)[0]
-
-		random_fact = randint(1,4)
+		random_fact = randint(1,6)
 		if random_fact == 1:
 			# Sample from the probability distribution
 			probabilities = softmax(prediction).numpy()
@@ -270,6 +266,7 @@ class Agent(pygame.sprite.Sprite):
 
 		# Optionally, convert the index to a label
 		predicted_label = list(self.player.modeller.label_dict.keys())[predicted_class_index]
+
 		return predicted_label
 
 	def update(self):
