@@ -19,13 +19,7 @@ Upon landing, they must explore the [environment], making [observations] and tak
 
 At any time a replicant [AI agent] can be left to its devices, and will attempt to continue carrying out actions based on how it has acted so far.
 
-The player can spawn a new replicant when it has enough resources. The new replicant can either act with an existing policy, or the player can 'play' as the replicant, essentially training a new policy.
-
-There would be a small number of 'upgrades' that can be researched with sufficient resources, most of which directly affect the performance of the replicant AI. these could be:
-* increased observation space (eg 7x7 to 8x8 grid)
-* Increased maximum number of observations possible to train a policy
-* Ability to mass-update all agents with an available policy
- 
+The player can spawn a new replicant when it has enough resources. All replicants act on the current policy activated, however once multiple policies are created, the player may switch between active policies.
 
 The objective is general RTS style- collect enough resources to produce enough replicates to battle and defeat the other human players.
 
@@ -37,16 +31,18 @@ There are three types of resource to collect:
 
 * Organic:
  * These are abundant throughout the map and continue to slowly 'grow' based on Game of Life mechanics.
- * They are required primarily to create replicants. (maybe they will also be consumed slowly by replicants taking actions, to ensure only 'healthy' replicants can survive)
+ * They are required to create replicants.
+ * Mining organic resources replenishes replicant energy
 
 * Inorganic (minerals):
  * These are less abundant, and do no replenish over time.
  * These are required for permanent upgrades to replicants systems
+ * Mining minerals uses replicant energy 
 
 * Alien Artifacts:
  * These are extremely rare and always guarded by hostile NPCs.
- * Unlike the other resources types, these need to be picked up by replicants and carried back to the ship to be gathered
- * Control over a critical number of these artifacts unlocks high level upgrades to be researched, the final of which wins the game
+ * Unlike the other resources types, these dare not harvested, but need to be 'attacked' on a regular interval to maintain control
+ * Control over a critical number of these artifacts wins the game, or perhaps in later iterations of the game unlocks high level upgrades to be researched, the final of which wins the game
 
 ## Coding Scheme
 Integer encoding will be used to represent different possible contents of each cell in the grid around the player/agent:
@@ -74,8 +70,23 @@ The UI will show current metrics for the player and the agent they are in contro
 * Policy Metrics
 * Recording/Not-recording
 
-# Policies
+# Policies/Models
 Initially, there will only be a sinlge policy available, which can be updated by 'recording' data frames. The player can toggle on/off whether they want to record data frames at any time.
 
 The player may update the policy based on new data frames at any time, which will create a new model for the existing agents to follow. 
+
+# Uprades
+
+There would be a small number of 'upgrades' that can be researched with sufficient resources, most of which directly affect the performance of the replicants and their AI. these could be:
+
+* Policy Upgrades
+  * Increased maximum number of observations possible in a dataset (+100 per upgrade)
+  * Ability to save multiple datasets 
+  * Increased maximum number of policies (+1 per upgrade)
+* Replicant Upgrades
+  * Reduction of the energy depletion suffered by replicants when mining minerals
+  * Increased attack damage/harvesting rate
+  * Increased speed
+
+ 
 
